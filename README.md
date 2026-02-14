@@ -25,8 +25,8 @@ pip install -r requirements.txt
 ## Project Timeline
 - **Phase 1**: Dataset Collection (Days 1-7)
 - **Phase 2**: Data Cleaning & Annotation (Days 8-14)
-- **Phase 3**: Model Development & Testing (Days 15-21)
-- **Phase 4**: Documentation & Presentation (Days 22-30)
+- **Phase 3**: Model Development & Testing 
+- **Phase 4**: Documentation & Presentation 
 
 ## Project Structure
 ```
