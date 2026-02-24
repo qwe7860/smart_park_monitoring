@@ -1,0 +1,96 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Times New Roman;}{\f1 Calibri;}}
+\fs24
+\pard\qc\b SMART PARK USAGE \& CROWD BEHAVIOUR MONITORING SYSTEM\b0\par
+\pard\qc Final Project Report\par
+\pard\qc Internship Project (2026)\par
+\pard\sa200\par
+\pard\b 1. Abstract\b0\par
+This project presents an offline AI-powered system for monitoring urban park usage using recorded videos. The pipeline detects people, estimates crowd density over time, measures motion intensity, predicts activity classes, and identifies congestion windows. Results are presented in a Streamlit dashboard for easy interpretation by non-technical stakeholders.\par
+\pard\b 2. Problem Statement\b0\par
+Manual observation of park usage is inconsistent and difficult to scale. Urban local bodies need objective evidence on crowd patterns, dominant activities, and congestion periods for safety and maintenance planning. This project automates that analysis and generates data-backed insights.\par
+\pard\b 3. Objectives\b0\par
+1. Detect and count people in park videos.\par
+2. Analyze motion trends across time.\par
+3. Classify activities into sitting, walking, and high_activity.\par
+4. Detect sustained congestion windows.\par
+5. Provide dashboard-based decision support.\par
+\pard\b 4. Tools and Technologies\b0\par
+Language: Python 3.x\par
+Libraries: OpenCV, Ultralytics YOLOv8, scikit-learn, pandas, matplotlib, Streamlit\par
+Model: YOLOv8n for people detection; RandomForestClassifier for activity classification\par
+\pard\b 5. System Architecture\b0\par
+The end-to-end workflow is orchestrated in src/pipeline/video_workflow.py:\par
+- Input video saved to data/raw_videos\par
+- YOLO people counting (per second) to data/processed/people_per_second\par
+- Motion extraction via background subtraction to data/processed/motion_raw\par
+- Motion aggregation to per-second features\par
+- Merge with people counts into master dataset\par
+- ML activity prediction\par
+- Activity distribution, crowd statistics, and congestion detection generation\par
+- Streamlit dashboard visualization\par
+\pard\b 6. Methodology\b0\par
+\b 6.1 People Detection\b0\par
+YOLOv8n detects class 0 (person). Counts are sampled approximately at 1 FPS for computational efficiency.\par
+\b 6.2 Motion Analysis\b0\par
+OpenCV MOG2 background subtraction estimates motion pixels; motion ratio is computed as moving pixels over total frame pixels.\par
+\b 6.3 Feature Engineering\b0\par
+Per-second features used by activity model: avg_motion_ratio, motion_std, people_count.\par
+\b 6.4 Activity Classification\b0\par
+A Random Forest model (150 estimators, balanced class weights) predicts activity labels from engineered features.\par
+\b 6.5 Congestion Detection\b0\par
+A congestion window is detected when people_count >= 10 continuously for at least 10 seconds.\par
+\pard\b 7. Dataset and Coverage (Current Outputs)\b0\par
+- Videos analyzed: 23\par
+- Prediction rows: 919\par
+- Approximate analyzed duration: 896 seconds\par
+- Average analyzed duration per video: 38.96 seconds\par
+\pard\b 8. Key Results\b0\par
+\b Crowd Metrics\b0\par
+- Overall average crowd: 8.03 people\par
+- Mean peak crowd per video: 12.87\par
+- Maximum observed peak: 20 people\par
+Top 3 videos by average crowd:\par
+1) park2_07 (14.15 avg, 18 peak)\par
+2) park2_08 (14.00 avg, 20 peak)\par
+3) park2_14 (12.75 avg, 18 peak)\par
+\b Activity Metrics\b0\par
+Dominant activity across 23 videos:\par
+- walking: 15 videos\par
+- high_activity: 7 videos\par
+- sitting: 1 video\par
+Mean percentages across videos:\par
+- sitting: 7.99\'25\par
+- walking: 60.51\'25\par
+- high_activity: 28.42\'25\par
+\b Congestion Metrics\b0\par
+- Congestion events detected: 5\par
+- Videos with congestion: 5\par
+- Affected videos: park2_01, park2_07, park2_08, park2_14, park2_18\par
+\pard\b 9. Dashboard Outputs\b0\par
+The dashboard provides:\par
+- Overview KPIs (avg crowd, peak crowd, congestion events, dominant activity, utilization score)\par
+- Crowd-over-time visualization\par
+- Activity distribution chart\par
+- Congestion event table\par
+- Feature importance panel\par
+\pard\b 10. Strengths\b0\par
+1. Functional end-to-end workflow from raw video to management insights.\par
+2. Modular codebase for easy upgrades.\par
+3. Incremental upsert strategy for newly uploaded videos.\par
+4. Clear, non-technical dashboard outputs for stakeholders.\par
+\pard\b 11. Limitations\b0\par
+1. Current dashboard focuses on summary analytics, not frame-wise annotated playback.\par
+2. 1 FPS counting may miss short spikes.\par
+3. No person tracking/re-identification; analysis is crowd-level.\par
+4. no_activity class is present in predictions but not explicitly reported in dashboard percentages.\par
+\pard\b 12. Conclusion\b0\par
+The project achieves a strong MVP for offline smart park monitoring within a short internship timeline. It delivers actionable evidence on crowd load, behaviour patterns, and congestion episodes, supporting data-informed decisions for urban park operations.\par
+\pard\b 13. 30-Day Accelerated Plan\b0\par
+Week 1: Scope freeze, config cleanup, reproducible runbook\par
+Week 2: Full rerun and validation on all videos\par
+Week 3: Dashboard/report polishing and feedback incorporation\par
+Week 4: Final submission package (report, presentation, demo)\par
+\pard\sa200\par
+\pard\i Prepared for academic project submission.\i0\par
+}

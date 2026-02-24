@@ -1,45 +1,28 @@
 import os
-import cv2
 import csv
+from pathlib import Path
+
+import cv2
 from ultralytics import YOLO
 
-# CONFIG
 VIDEO_DIR = "data/raw_videos"
 OUTPUT_DIR = "data/processed/people_per_second"
+DEFAULT_MODEL_PATH = "yolov8n.pt"
 
-os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# Load lightweight YOLO model
-model = YOLO("yolov8n.pt")
-
-# PROCESS VIDEOS
-for video_name in os.listdir(VIDEO_DIR):
-
-    if not video_name.lower().endswith(".mp4"):
-        continue
-
-    video_path = os.path.join(VIDEO_DIR, video_name)
-    cap = cv2.VideoCapture(video_path)
-
+def detect_people_in_video(video_path, output_csv_path, model, resize=(640, 360)):
+    cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
-        print(f"Could not open {video_name}")
-        continue
+        raise RuntimeError(f"Could not open video: {video_path}")
 
     fps = cap.get(cv2.CAP_PROP_FPS)
     fps = int(fps) if fps > 0 else 25
+    frame_id = 0
+    video_name = Path(video_path).stem
 
-    output_csv = os.path.join(
-        OUTPUT_DIR,
-        video_name.replace(".mp4", "_people.csv")
-    )
-
-    print(f"Processing: {video_name}")
-
-    with open(output_csv, "w", newline="", encoding="utf-8") as f:
+    with open(output_csv_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["video", "second", "people_count"])
-
-        frame_id = 0
 
         while True:
             ret, frame = cap.read()
@@ -47,33 +30,46 @@ for video_name in os.listdir(VIDEO_DIR):
                 break
 
             frame_id += 1
-
-            #Process only 1 frame per second
             if frame_id % fps != 0:
                 continue
 
             second = frame_id // fps
-
-            # Resize for faster inference
-            frame = cv2.resize(frame, (640, 360))
-
+            frame = cv2.resize(frame, resize)
             results = model(frame, verbose=False)
 
             people_count = 0
-
             for result in results:
-                boxes = result.boxes
-                for box in boxes:
-                    cls = int(box.cls[0])
-                    if cls == 0:  # class 0 = person
+                for box in result.boxes:
+                    if int(box.cls[0]) == 0:
                         people_count += 1
 
-            writer.writerow([
-                video_name.replace(".mp4", ""),
-                second,
-                people_count
-            ])
+            writer.writerow([video_name, second, people_count])
 
     cap.release()
+    return output_csv_path
 
-print("YOLO 1-FPS detection complete.")
+
+def process_all_videos(
+    video_dir=VIDEO_DIR,
+    output_dir=OUTPUT_DIR,
+    model_path=DEFAULT_MODEL_PATH,
+):
+    os.makedirs(output_dir, exist_ok=True)
+    model = YOLO(model_path)
+    processed_files = []
+
+    for video_name in os.listdir(video_dir):
+        if not video_name.lower().endswith(".mp4"):
+            continue
+        video_path = os.path.join(video_dir, video_name)
+        output_csv = os.path.join(output_dir, f"{Path(video_name).stem}_people.csv")
+        print(f"Processing: {video_name}")
+        detect_people_in_video(video_path, output_csv, model=model)
+        processed_files.append(output_csv)
+
+    return processed_files
+
+
+if __name__ == "__main__":
+    process_all_videos()
+    print("YOLO 1-FPS detection complete.")

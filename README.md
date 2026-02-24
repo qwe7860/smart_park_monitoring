@@ -22,26 +22,21 @@ AI-powered offline system for monitoring park usage patterns, crowd density, and
 pip install -r requirements.txt
 ```
 
-## Project Timeline
-- **Phase 1**: Dataset Collection (Days 1-7)
-- **Phase 2**: Data Cleaning & Annotation (Days 8-14)
-- **Phase 3**: Model Development & Testing 
-- **Phase 4**: Documentation & Presentation 
-
-## Project Structure
-```
-smart-park-monitoring/
-├── data/               # All datasets
-├── models/             # Trained models
-├── notebooks/          # Jupyter experiments
-├── src/                # Source code
-├── docs/               # Documentation
-├── reports/            # Weekly reports
-└── outputs/            # Results & visualizations
-```
+## Folder Map
+- `data/raw_videos/`: uploaded/source videos
+- `data/processed/`: generated CSVs, stats, plots
+- `models/`: trained model artifacts
+- `src/dashboard/`: Streamlit app
+- `src/pipeline/`: end-to-end workflow orchestration
+- `src/detection/`: people detection logic
+- `src/preprocessing/`: motion/features preprocessing
+- `src/ml_pipeline/`: train/predict model modules
+- `src/analysis/`: summary statistics and analysis outputs
+- `archive/notebooks_old/`: old experiments (archived)
+- `archive/reports_old/`: old report files (archived)
 
 ## Project Status
-🚧 **Week 1**: Setting up environment and starting data collection
+In active development.
 
 ## Author
 Iftikhar Ali Sarkar, Chinmoy Barman - Internship Project 2026

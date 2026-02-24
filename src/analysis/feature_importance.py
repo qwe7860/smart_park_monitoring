@@ -6,56 +6,47 @@ import os
 # =========================
 # CONFIG
 # =========================
-MODEL_PATH = r"D:\smart_park_monitoring\models\activity_rf_model.pkl"
+MODEL_PATH = "models/activity_rf_model.pkl"
 DATA_PATH = "data/processed/master_labeled.csv"
 OUTPUT_IMAGE = "data/processed/feature_importance.png"
 
 os.makedirs(os.path.dirname(OUTPUT_IMAGE), exist_ok=True)
 
-# =========================
-# LOAD MODEL
-# =========================
-model = joblib.load(MODEL_PATH)
+def generate_feature_importance_plot(
+    model_path=MODEL_PATH,
+    data_path=DATA_PATH,
+    output_image=OUTPUT_IMAGE,
+):
+    model = joblib.load(model_path)
+    df = pd.read_csv(data_path)
+    feature_columns = ["avg_motion_ratio", "motion_std", "people_count"]
+    _ = df[feature_columns]
 
-# =========================
-# LOAD TRAINING DATA
-# =========================
-df = pd.read_csv(DATA_PATH)
+    importances = model.feature_importances_
+    importance_df = pd.DataFrame({
+        "feature": feature_columns,
+        "importance": importances,
+    }).sort_values(by="importance", ascending=False)
 
-# EXACT SAME FEATURES USED IN TRAINING
-feature_columns = [
-    "avg_motion_ratio",
-    "motion_std",
-    "people_count"
-]
+    os.makedirs(os.path.dirname(output_image), exist_ok=True)
+    plt.figure()
+    plt.bar(importance_df["feature"], importance_df["importance"])
+    plt.xticks(rotation=45)
+    plt.xlabel("Feature")
+    plt.ylabel("Importance")
+    plt.title("Random Forest Feature Importance")
+    plt.tight_layout()
+    plt.savefig(output_image)
+    plt.close()
 
-X = df[feature_columns]
+    return {
+        "output_image": output_image,
+        "importance_table": importance_df.to_dict(orient="records"),
+    }
 
-# =========================
-# GET IMPORTANCES
-# =========================
-importances = model.feature_importances_
 
-importance_df = pd.DataFrame({
-    "feature": feature_columns,
-    "importance": importances
-}).sort_values(by="importance", ascending=False)
-
-print("\nFeature Importance Ranking:\n")
-print(importance_df)
-
-# =========================
-# PLOT
-# =========================
-plt.figure()
-plt.bar(importance_df["feature"], importance_df["importance"])
-plt.xticks(rotation=45)
-plt.xlabel("Feature")
-plt.ylabel("Importance")
-plt.title("Random Forest Feature Importance")
-plt.tight_layout()
-
-plt.savefig(OUTPUT_IMAGE)
-plt.close()
-
-print(f"\nFeature importance plot saved to {OUTPUT_IMAGE}")
+if __name__ == "__main__":
+    result = generate_feature_importance_plot()
+    print("\nFeature Importance Ranking:\n")
+    print(result["importance_table"])
+    print(f"\nFeature importance plot saved to {OUTPUT_IMAGE}")
