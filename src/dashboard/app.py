@@ -127,7 +127,6 @@ def render_dashboard():
     default_index = video_list.index(default_video) if default_video in video_list else 0
     selected_video = st.selectbox("Select Video", video_list, index=default_index)
 
-
     video_stats = crowd_stats[crowd_stats["video"] == selected_video]
     video_activity = activity_dist[activity_dist["video"] == selected_video]
 
@@ -135,7 +134,8 @@ def render_dashboard():
         sitting = float(video_activity["sitting_percent"].iloc[0])
         walking = float(video_activity["walking_percent"].iloc[0])
         high = float(video_activity["high_activity_percent"].iloc[0])
-        activity_score = (walking * 2 + high * 3 + sitting) / 100
+        # Normalize weighted activity score to 0-1 range.
+        activity_score = ((walking * 2 + high * 3 + sitting) / 100) / 3
     else:
         sitting, walking, high = 0.0, 0.0, 0.0
         activity_score = 0
